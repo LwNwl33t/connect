@@ -772,7 +772,6 @@ export type ButtonRequestType = $Keys<typeof Enum_ButtonRequestType>;
 export type ButtonRequest = {
     code?: ButtonRequestType,
     pages?: number,
-    page_number?: number,
 };
 
 // ButtonAck
@@ -1192,6 +1191,26 @@ export type EthereumSignTx = {
     data_length?: number,
     chain_id?: number,
     tx_type?: number,
+};
+
+export type EthereumAccessList = {
+    address: string,
+    storage_keys: string[],
+};
+
+// EthereumSignTxEIP1559
+export type EthereumSignTxEIP1559 = {
+    address_n: number[],
+    nonce: string,
+    max_gas_fee: string,
+    max_priority_fee: string,
+    gas_limit: string,
+    to?: string,
+    value: string,
+    data_initial_chunk?: string,
+    data_length: number,
+    chain_id: number,
+    access_list: EthereumAccessList[],
 };
 
 // EthereumTxRequest
@@ -2150,6 +2169,8 @@ export type MessageType = {
     EthereumGetAddress: EthereumGetAddress,
     EthereumAddress: EthereumAddress,
     EthereumSignTx: EthereumSignTx,
+    EthereumAccessList: $Exact<EthereumAccessList>,
+    EthereumSignTxEIP1559: $Exact<EthereumSignTxEIP1559>,
     EthereumTxRequest: EthereumTxRequest,
     EthereumTxAck: EthereumTxAck,
     EthereumSignMessage: EthereumSignMessage,
