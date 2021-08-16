@@ -16,10 +16,13 @@ import type {
 
 type Params = {
     path: number[],
-    transaction: EthereumTransaction,
+    tx:
+        | ({ type: 'legacy' } & EthereumTransaction)
+        | ({ type: 'eip1559' } & EthereumTransactionEIP1559),
 };
 
-const strip = value => {
+// const strip: <T>(value: T) => T = value => {
+const strip: (value: any) => any = value => {
     if (typeof value === 'string') {
         let stripped = stripHexPrefix(value);
         // pad left even
@@ -55,15 +58,21 @@ export default class EthereumSignTx extends AbstractMethod {
 
         const path = validatePath(payload.path, 3);
         const network = getEthereumNetwork(path);
-        this.firmwareRange = getFirmwareRange(this.name, network, this.firmwareRange);
 
         this.info = getNetworkLabel('Sign #NETWORK transaction', network);
 
         // incoming transaction should be in EthereumTx format
         // https://github.com/ethereumjs/ethereumjs-tx
-        const tx: EthereumTransaction | EthereumTransactionEIP1559 = payload.transaction;
+        const tx = payload.transaction;
+        const isEIP1559 = tx.maxFeePerGas && tx.maxPriorityFeePerGas;
 
-        const isEIP1559 = tx.maxFeePerGas !== undefined && tx.maxPriorityFeePerGas !== undefined;
+        // get firmware range depending on used transaction type
+        // eip1559 is possible since 2.4.2
+        this.firmwareRange = getFirmwareRange(
+            isEIP1559 ? 'eip1559' : this.name,
+            network,
+            this.firmwareRange,
+        );
 
         const schema = isEIP1559
             ? [
@@ -89,22 +98,18 @@ export default class EthereumSignTx extends AbstractMethod {
 
         validateParams(tx, schema);
 
-        // TODO: check if tx data is a valid hex
-
         this.params = {
             path,
-            // strip '0x' from values
-            transaction: strip(tx),
+            tx: {
+                type: isEIP1559 ? 'eip1559' : 'legacy',
+                ...strip(tx), // strip '0x' from values
+            },
         };
     }
 
     run() {
-        const tx = this.params.transaction;
-        const isEIP1559 =
-            !this.device.unavailableCapabilities.eip1559 &&
-            tx.maxFeePerGas !== undefined &&
-            tx.maxPriorityFeePerGas !== undefined;
-        return isEIP1559
+        const { tx } = this.params;
+        return tx.type === 'eip1559'
             ? helper.ethereumSignTxEIP1559(
                   this.device.getCommands().typedCall.bind(this.device.getCommands()),
                   this.params.path,

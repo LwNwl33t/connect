@@ -30,6 +30,8 @@ export type EthereumTransaction = {
     value: string,
     gasPrice: string,
     gasLimit: string,
+    maxFeePerGas?: typeof undefined,
+    maxPriorityFeePerGas?: typeof undefined,
     nonce: string,
     data?: string,
     chainId?: number,
@@ -44,12 +46,13 @@ export type EthereumAccessList = {
 export type EthereumTransactionEIP1559 = {
     to: string,
     value: string,
+    gasPrice?: typeof undefined,
     gasLimit: string,
+    maxFeePerGas: string,
+    maxPriorityFeePerGas: string,
     nonce: string,
     data?: string,
     chainId: number,
-    maxFeePerGas: string,
-    maxPriorityFeePerGas: string,
     accessList?: EthereumAccessList[],
 };
 
