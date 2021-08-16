@@ -102,7 +102,7 @@ export const getFirmwareRange = (
     const range =
         supportedFirmware.find(
             c =>
-                c.coinType === coinType ||
+                (c.coinType && c.coinType === coinType) ||
                 (Array.isArray(c.coin) && c.coin.includes(shortcut)) ||
                 (typeof c.coin === 'string' && c.coin === shortcut),
         ) ||
@@ -119,19 +119,35 @@ export const getFirmwareRange = (
         // override defaults
         if (min) {
             const [t1, t2] = min;
-            if (current['1'].min === '0' || versionCompare(current['1'].min, t1) < 0) {
+            if (
+                t1 === '0' ||
+                current['1'].min === '0' ||
+                versionCompare(current['1'].min, t1) < 0
+            ) {
                 current['1'].min = t1;
             }
-            if (current['2'].min === '0' || versionCompare(current['2'].min, t2) < 0) {
+            if (
+                t2 === '0' ||
+                current['2'].min === '0' ||
+                versionCompare(current['2'].min, t2) < 0
+            ) {
                 current['2'].min = t2;
             }
         }
         if (max) {
             const [t1, t2] = max;
-            if (current['1'].max === '0' || versionCompare(current['1'].max, t1) < 0) {
+            if (
+                t1 === '0' ||
+                current['1'].max === '0' ||
+                versionCompare(current['1'].max, t1) < 0
+            ) {
                 current['1'].max = t1;
             }
-            if (current['2'].max === '0' || versionCompare(current['2'].max, t2) < 0) {
+            if (
+                t2 === '0' ||
+                current['2'].max === '0' ||
+                versionCompare(current['2'].max, t2) < 0
+            ) {
                 current['2'].max = t2;
             }
         }
